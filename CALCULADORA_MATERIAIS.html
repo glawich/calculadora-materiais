@@ -654,25 +654,25 @@
         }
 
         function exportarTXT() {
-            let txt = '========================================\n';
-            txt += 'REMESSA PARA INDUSTRIALIZAÇÃO\n';
-            txt += '========================================\n\n';
-            txt += 'CÓDIGO | DESCRIÇÃO DO PRODUTO/SERVIÇO | NCM | UN | QTDE | VALOR UNITÁRIO | VALOR TOTAL\n';
-            txt += '-------|------|-----|----|----|-----------------|---------------\n';
+            let txt = '';
 
-            materiais.forEach(m => {
+            materiais.forEach((m, index) => {
+                if (index > 0) txt += '\n';
                 const valorUnitario = m.precoPorKg * m.pesoUnitario;
-                txt += `       | ${m.material} ${m.descricao} | ${m.ncm} | EA | ${m.quantidade} | R$ ${valorUnitario.toFixed(2)} | R$ ${m.valorTotal.toFixed(2)}\n`;
+                txt += `Material: ${m.material}\n`;
+                txt += `Descrição: ${m.descricao}\n`;
+                txt += `NCM: ${m.ncm}\n`;
+                txt += `Unidade: EA\n`;
+                txt += `Quantidade: ${m.quantidade}\n`;
+                txt += `Valor Unitário: R$ ${valorUnitario.toFixed(2)}\n`;
+                txt += `Valor Total: R$ ${m.valorTotal.toFixed(2)}`;
             });
 
             const totalItens = materiais.reduce((sum, m) => sum + m.quantidade, 0);
             const valorTotal = materiais.reduce((sum, m) => sum + m.valorTotal, 0);
 
-            txt += '\n========================================\n';
-            txt += 'RESUMO PARA NF\n';
-            txt += '========================================\n';
-            txt += `Total de Itens: ${totalItens}\n`;
-            txt += `Valor Total: R$ ${valorTotal.toFixed(2)}\n`;
+            txt += `\n\nTotal de Itens: ${totalItens}\n`;
+            txt += `Valor Total: R$ ${valorTotal.toFixed(2)}`;
 
             // Copiar para clipboard
             navigator.clipboard.writeText(txt).then(() => {
