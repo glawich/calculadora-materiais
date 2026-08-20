@@ -437,8 +437,11 @@
                             <th>Material</th>
                             <th>NCM</th>
                             <th class="number-cell">Qtd</th>
+                            <th class="number-cell">Vol. Unit. (cm³)</th>
+                            <th class="number-cell">Vol. Total (cm³)</th>
                             <th class="number-cell">Peso Unit. (kg)</th>
                             <th class="number-cell">Peso Total (kg)</th>
+                            <th class="number-cell">Preço Unit. (R$)</th>
                             <th class="number-cell">Preço/kg (R$)</th>
                             <th class="number-cell">Valor Total (R$)</th>
                             <th class="action-column">Ação</th>
@@ -458,20 +461,8 @@
                         <div class="summary-value" id="totalItens">0</div>
                     </div>
                     <div class="summary-item">
-                        <div class="summary-label">Volume Unitário (cm³)</div>
-                        <div class="summary-value" id="volumeUnitario">0,00</div>
-                    </div>
-                    <div class="summary-item">
-                        <div class="summary-label">Volume Total (cm³)</div>
-                        <div class="summary-value" id="volumeTotal">0,00</div>
-                    </div>
-                    <div class="summary-item">
                         <div class="summary-label">Peso Total (kg)</div>
                         <div class="summary-value" id="pesoTotal">0,00</div>
-                    </div>
-                    <div class="summary-item">
-                        <div class="summary-label">Preço Unitário (R$)</div>
-                        <div class="summary-value" id="precoUnitario">0,00</div>
                     </div>
                     <div class="summary-item">
                         <div class="summary-label">Valor Total (R$)</div>
@@ -621,13 +612,17 @@
 
             materiais.forEach(m => {
                 const tr = document.createElement('tr');
+                const volumeTotal = m.volumeUnitario * m.quantidade;
                 tr.innerHTML = `
                     <td>${m.descricao}</td>
                     <td>${m.material}</td>
                     <td><strong>${m.ncm}</strong></td>
                     <td class="number-cell"><input type="number" value="${m.quantidade}" min="1" style="width:60px; padding:5px;" onchange="editarQuantidade(${m.id}, this.value)"></td>
+                    <td class="number-cell">${m.volumeUnitario.toFixed(2)}</td>
+                    <td class="number-cell">${volumeTotal.toFixed(2)}</td>
                     <td class="number-cell">${m.pesoUnitario.toFixed(3)}</td>
                     <td class="number-cell">${m.pesoTotal.toFixed(2)}</td>
+                    <td class="number-cell">R$ ${m.precoUnitario.toFixed(2)}</td>
                     <td class="number-cell">R$ ${m.precoPorKg.toFixed(2)}</td>
                     <td class="number-cell"><strong>R$ ${m.valorTotal.toFixed(2)}</strong></td>
                     <td class="action-column"><button class="btn-danger" onclick="removerMaterial(${m.id})">✕</button></td>
@@ -640,17 +635,11 @@
 
         function atualizarResumo() {
             const totalItens = materiais.reduce((sum, m) => sum + m.quantidade, 0);
-            const volumeUnitario = materiais.length > 0 ? materiais[materiais.length - 1].volumeUnitario : 0;
-            const volumeTotal = materiais.reduce((sum, m) => sum + (m.volumeUnitario * m.quantidade), 0);
             const pesoTotal = materiais.reduce((sum, m) => sum + m.pesoTotal, 0);
-            const precoUnitario = materiais.length > 0 ? materiais[materiais.length - 1].precoUnitario : 0;
             const valorTotal = materiais.reduce((sum, m) => sum + m.valorTotal, 0);
 
             document.getElementById('totalItens').textContent = totalItens;
-            document.getElementById('volumeUnitario').textContent = volumeUnitario.toFixed(2);
-            document.getElementById('volumeTotal').textContent = volumeTotal.toFixed(2);
             document.getElementById('pesoTotal').textContent = pesoTotal.toFixed(2);
-            document.getElementById('precoUnitario').textContent = 'R$ ' + precoUnitario.toFixed(2);
             document.getElementById('valorTotal').textContent = 'R$ ' + valorTotal.toFixed(2);
         }
 
