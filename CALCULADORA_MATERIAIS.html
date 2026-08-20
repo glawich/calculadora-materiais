@@ -657,7 +657,7 @@
             let txt = '';
 
             materiais.forEach((m, index) => {
-                if (index > 0) txt += '\n';
+                if (index > 0) txt += '\n----------------------------------------\n\n';
                 const valorUnitario = m.precoPorKg * m.pesoUnitario;
                 txt += `Material: ${m.material}\n`;
                 txt += `Descrição: ${m.descricao}\n`;
