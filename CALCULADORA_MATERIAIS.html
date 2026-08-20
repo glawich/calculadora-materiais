@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Calculadora de Materiais - NF Industrialização</title>
     <style>
         * {
@@ -455,8 +458,20 @@
                         <div class="summary-value" id="totalItens">0</div>
                     </div>
                     <div class="summary-item">
+                        <div class="summary-label">Volume Unitário (cm³)</div>
+                        <div class="summary-value" id="volumeUnitario">0,00</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Volume Total (cm³)</div>
+                        <div class="summary-value" id="volumeTotal">0,00</div>
+                    </div>
+                    <div class="summary-item">
                         <div class="summary-label">Peso Total (kg)</div>
                         <div class="summary-value" id="pesoTotal">0,00</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Preço Unitário (R$)</div>
+                        <div class="summary-value" id="precoUnitario">0,00</div>
                     </div>
                     <div class="summary-item">
                         <div class="summary-label">Valor Total (R$)</div>
@@ -507,7 +522,7 @@
             document.getElementById('diametroGroup').style.display = (tipo === 'cilindro' || tipo === 'esfera') ? 'flex' : 'none';
         });
 
-        function calcularPeso(densidade, tipo) {
+        function calcularVolume(tipo) {
             const comp = parseFloat(document.getElementById('comprimento').value) || 0;
             const larg = parseFloat(document.getElementById('largura').value) || 0;
             const alt = parseFloat(document.getElementById('altura').value) || 0;
@@ -525,6 +540,11 @@
                 volume = (4/3) * Math.PI * raio * raio * raio;
             }
 
+            return volume;
+        }
+
+        function calcularPeso(densidade, tipo) {
+            const volume = calcularVolume(tipo);
             return (volume * densidade) / 1000; // Converter de gramas para kg
         }
 
@@ -533,7 +553,7 @@
             const tipo = document.getElementById('tipoGeometria').value;
             const quantidade = parseFloat(document.getElementById('quantidade').value) || 0;
             const precoPorKg = parseFloat(document.getElementById('precoPorKg').value) || 0;
-            const descricao = document.getElementById('descricao').value || 'Sem descrição';
+            const descricao = document.getElementById('descricao').value;
             const ncm = document.getElementById('ncm').value;
 
             if (!material || quantidade <= 0 || precoPorKg < 0 || !ncm) {
@@ -543,19 +563,40 @@
 
             const [materialNome, densidadeStr, ncmCode] = material.split('|');
             const densidade = parseFloat(densidadeStr);
+            const volumeUnitario = calcularVolume(tipo);
             const pesoUnitario = calcularPeso(densidade, tipo);
             const pesoTotal = pesoUnitario * quantidade;
             const valorTotal = pesoTotal * precoPorKg;
+            const precoUnitario = pesoUnitario * precoPorKg;
+
+            // Construir descrição automática se não preenchida
+            let descricaoFinal = descricao;
+            if (!descricao) {
+                const comp = parseFloat(document.getElementById('comprimento').value) || 0;
+                const larg = parseFloat(document.getElementById('largura').value) || 0;
+                const alt = parseFloat(document.getElementById('altura').value) || 0;
+                const diam = parseFloat(document.getElementById('diametro').value) || 0;
+
+                if (tipo === 'bloco') {
+                    descricaoFinal = `${materialNome} ${comp}x${larg}x${alt}mm`;
+                } else if (tipo === 'cilindro') {
+                    descricaoFinal = `${materialNome} Ø${diam}x${alt}mm`;
+                } else if (tipo === 'esfera') {
+                    descricaoFinal = `${materialNome} Ø${diam}mm`;
+                }
+            }
 
             materiais.push({
                 id: contadorId++,
-                descricao,
+                descricao: descricaoFinal,
                 material: materialNome,
                 ncm: ncmCode,
                 quantidade,
+                volumeUnitario,
                 pesoUnitario,
                 pesoTotal,
                 precoPorKg,
+                precoUnitario,
                 valorTotal
             });
 
@@ -599,11 +640,17 @@
 
         function atualizarResumo() {
             const totalItens = materiais.reduce((sum, m) => sum + m.quantidade, 0);
+            const volumeUnitario = materiais.length > 0 ? materiais[materiais.length - 1].volumeUnitario : 0;
+            const volumeTotal = materiais.reduce((sum, m) => sum + (m.volumeUnitario * m.quantidade), 0);
             const pesoTotal = materiais.reduce((sum, m) => sum + m.pesoTotal, 0);
+            const precoUnitario = materiais.length > 0 ? materiais[materiais.length - 1].precoUnitario : 0;
             const valorTotal = materiais.reduce((sum, m) => sum + m.valorTotal, 0);
 
             document.getElementById('totalItens').textContent = totalItens;
+            document.getElementById('volumeUnitario').textContent = volumeUnitario.toFixed(2);
+            document.getElementById('volumeTotal').textContent = volumeTotal.toFixed(2);
             document.getElementById('pesoTotal').textContent = pesoTotal.toFixed(2);
+            document.getElementById('precoUnitario').textContent = 'R$ ' + precoUnitario.toFixed(2);
             document.getElementById('valorTotal').textContent = 'R$ ' + valorTotal.toFixed(2);
         }
 
@@ -618,6 +665,7 @@
                 material.quantidade = parseInt(novaQuantidade) || 1;
                 material.pesoTotal = material.pesoUnitario * material.quantidade;
                 material.valorTotal = material.pesoTotal * material.precoPorKg;
+                material.precoUnitario = material.pesoUnitario * material.precoPorKg;
                 renderizarTabela();
             }
         }
@@ -658,13 +706,11 @@
 
             materiais.forEach((m, index) => {
                 if (index > 0) txt += '\n----------------------------------------\n\n';
-                const valorUnitario = m.precoPorKg * m.pesoUnitario;
-                txt += `Material: ${m.material}\n`;
                 txt += `Descrição: ${m.descricao}\n`;
                 txt += `NCM: ${m.ncm}\n`;
                 txt += `Unidade: EA\n`;
                 txt += `Quantidade: ${m.quantidade}\n`;
-                txt += `Valor Unitário: R$ ${valorUnitario.toFixed(2)}\n`;
+                txt += `Valor Unitário: R$ ${m.precoUnitario.toFixed(2)}\n`;
                 txt += `Valor Total: R$ ${m.valorTotal.toFixed(2)}`;
             });
 
