@@ -355,13 +355,13 @@
                         <label>Material</label>
                         <select id="material" onchange="atualizarNCM()">
                             <option value="">-- Selecione --</option>
-                            <option value="aluminio|2.70|7601.10.00">Alumínio (2,70 g/cm³) - NCM 7601.10.00</option>
-                            <option value="aco|7.85|7207.19.90">Aço Carbono (7,85 g/cm³) - NCM 7207.19.90</option>
-                            <option value="inox|7.98|7222.30.90">Aço Inox 304 (7,98 g/cm³) - NCM 7222.30.90</option>
-                            <option value="bronze|8.75|7408.11.00">Bronze (8,75 g/cm³) - NCM 7408.11.00</option>
-                            <option value="latao|8.40|7408.11.00">Latão (8,40 g/cm³) - NCM 7408.11.00</option>
-                            <option value="cobre|8.96|7408.11.00">Cobre (8,96 g/cm³) - NCM 7408.11.00</option>
-                            <option value="titanio|4.51|8108.30.90">Titânio (4,51 g/cm³) - NCM 8108.30.90</option>
+                            <option value="aluminio|2.70|7606.12.90">Alumínio (2,70 g/cm³) - NCM 7606.12.90</option>
+                            <option value="aco|7.85|7211.90.00">Aço Carbono (7,85 g/cm³) - NCM 7211.90.00</option>
+                            <option value="inox|7.98|7219.90.00">Aço Inox 304 (7,98 g/cm³) - NCM 7219.90.00</option>
+                            <option value="bronze|8.75|7409.31.90">Bronze (8,75 g/cm³) - NCM 7409.31.90</option>
+                            <option value="latao|8.40|7409.31.90">Latão (8,40 g/cm³) - NCM 7409.31.90</option>
+                            <option value="cobre|8.96|7409.19.90">Cobre (8,96 g/cm³) - NCM 7409.19.90</option>
+                            <option value="titanio|4.51|8108.90.00">Titânio (4,51 g/cm³) - NCM 8108.90.00</option>
                             <option value="plastico|1.20|3916.90.90">Plástico ABS (1,20 g/cm³) - NCM 3916.90.90</option>
                             <option value="pom|1.41|3916.90.90">POM - Poliacetal (1,41 g/cm³) - NCM 3916.90.90</option>
                         </select>
@@ -529,7 +529,7 @@
                 volume = (4/3) * Math.PI * raio * raio * raio;
             }
 
-            return volume * densidade;
+            return (volume * densidade) / 1000; // Converter de gramas para kg
         }
 
         function adicionarMaterial() {
